@@ -55,8 +55,7 @@ modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
 <p>test</p>
 <ul>
     <li>test line one</li>
-    <li>test line two
-        test</li>
+    <li>test line two test</li>
 </ul>
 <p>test</p>
 
