@@ -19,6 +19,7 @@
     @copyright: 2007 MoinMoin:RadomirDopieralski (creole 0.5 implementation),
                 2007 MoinMoin:ThomasWaldmann (updates)
     @license: GNU GPL, see COPYING for details.
+    @license: BSD, see COPYING for details.
 """
 
 import re
