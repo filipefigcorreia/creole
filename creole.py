@@ -264,7 +264,7 @@ class Parser:
             'number_list'):
             self.cur = self._upto(self.cur,
                 ('document', 'section', 'blockquote'))
-        elif self.cur.kind in ('document', 'section', 'blockquote'):
+        if self.cur.kind in ('document', 'section', 'blockquote'):
             self.cur = DocNode('paragraph', self.cur)
         else:
             text = u' ' + text
