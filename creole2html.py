@@ -67,7 +67,37 @@ modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
     </ul></li>
 </ul>
 
+>>> parse(u'* test line one\n* test line two\n# Nested item')
+<ul>
+    <li>test line one</li>
+    <li>test line two<ol>
+        <li>Nested item</li>
+    </ol></li>
+</ul>
 
+>>> parse(u'test //test test// test **test test** test')
+<p>test <i>test test</i> test <b>test test</b> test</p>
+
+>>> parse(u'test //test **test// test** test')
+<p>test <i>test <b>test<i> test<b> test</b></i></b></i></p>
+
+>>> parse(u'**test')
+<p><b>test</b></p>
+
+>>> parse(u'|x|y|z|\n|a|b|c|\n|d|e|f|\ntest')
+<table>
+    <tr><td>x</td><td>y</td><td>z</td></tr>
+    <tr><td>a</td><td>b</td><td>c</td></tr>
+    <tr><td>d</td><td>e</td><td>f</td></tr>
+</table>
+<p>test</p>
+
+>>> parse(u'|=x|y|=z=|\n|a|b|c|\n|d|e|f|')
+<table>
+    <tr><th>x</th><td>y</td><th>z</th></tr>
+    <tr><td>a</td><td>b</td><td>c</td></tr>
+    <tr><td>d</td><td>e</td><td>f</td></tr>
+</table>
 """
 
 import re
