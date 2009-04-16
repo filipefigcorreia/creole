@@ -1,13 +1,73 @@
 #!/usr/bin/env python
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
-"""
+r"""
 WikiCreole to HTML converter
 This program is an example of how the creole.py WikiCreole parser
 can be used.
 
 @copyright: 2007 MoinMoin:RadomirDopieralski
 @license: BSD, see COPYING for details.
+
+Test cases contributed by Jan Klopper (janklopper@underdark.nl),
+modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
+
+>>> import lxml.html.usedoctest
+>>> def parse(text):
+...     print HtmlEmitter(Parser(text).parse()).emit()
+
+>>> parse(u'test')
+<p>test</p>
+
+>>> parse(u'test\ntest')
+<p>test test</p>
+
+>>> parse(u'test\n\ntest')
+<p>test</p><p>test</p>
+
+>>> parse(u'test\\\\test')
+<p>test<br>test</p>
+
+>>> parse(u'ÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿŒœ%0A')
+<p>ÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿŒœ%0A</p>
+
+>>> parse(u'----')
+<hr>
+
+>>> parse(u'==test==')
+<h2>test</h2>
+
+>>> parse(u'== test')
+<h2>test</h2>
+
+>>> parse(u'==test====')
+<h2>test</h2>
+
+>>> parse(u'=====test')
+<h5>test</h5>
+
+>>> parse(u'==test==\ntest\n===test===')
+<h2>test</h2>
+<p>test</p>
+<h3>test</h3>
+
+>>> parse(u'test\n* test line one\n * test line two\ntest\n\ntest')
+<p>test</p>
+<ul>
+    <li>test line one</li>
+    <li>test line two
+        test</li>
+</ul>
+<p>test</p>
+
+>>> parse(u'* test line one\n* test line two\n** Nested item')
+<ul>
+    <li>test line one</li>
+    <li>test line two<ul>
+        <li>Nested item</li>
+    </ul></li>
+</ul>
+
 
 """
 
