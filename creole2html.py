@@ -98,6 +98,34 @@ modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
     <tr><td>a</td><td>b</td><td>c</td></tr>
     <tr><td>d</td><td>e</td><td>f</td></tr>
 </table>
+
+>>> parse(u'test http://example.com/test test')
+<p>test <a href="http://example.com/test">http://example.com/test</a> test</p>
+
+>>> parse(u'http://example.com/,test, test')
+<p><a href="http://example.com/,test">http://example.com/,test</a>, test</p>
+
+>>> parse(u'(http://example.com/test)')
+<p>(<a href="http://example.com/test">http://example.com/test</a>)</p>
+
+XXX This might be considered a bug, but it's impossible to detect in general.
+>>> parse(u'http://example.com/(test)')
+<p><a href="http://example.com/(test">http://example.com/(test</a>)</p>
+
+>>> parse(u'http://example.com/test?test&test=1')
+<p><a href="http://example.com/test?test&amp;test=1">http://example.com/test?test&amp;test=1</a></p>
+
+>>> parse(u'~http://example.com/test')
+<p>http://example.com/test</p>
+
+>>> parse(u'http://example.com/~test')
+<p><a href="http://example.com/~test">http://example.com/~test</a></p>
+
+>>> parse(u'[[test]] [[tset|test]]')
+<p><a href="test">test</a> <a href="tset">test</a></p>
+
+>>> parse(u'[[http://example.com|test]]')
+<p><a href="http://example.com">test</a></p>
 """
 
 import re
