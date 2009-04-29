@@ -259,7 +259,7 @@ class Parser:
     _head_text_repl = _head_repl
 
     def _text_repl(self, groups):
-        text = groups.get('text', '')+u' '
+        text = groups.get('text', '')
         if self.cur.kind in ('table', 'table_row', 'bullet_list',
             'number_list'):
             self.cur = self._upto(self.cur,

@@ -22,6 +22,9 @@ modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
 >>> parse(u'test\ntest')
 <p>test test</p>
 
+>>> HtmlEmitter(Parser(u'test\ntest').parse()).emit()
+u'<p>test test</p>\n'
+
 >>> parse(u'test\n\ntest')
 <p>test</p><p>test</p>
 
