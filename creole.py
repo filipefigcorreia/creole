@@ -24,6 +24,9 @@
 
 import re
 
+__version__ = '1.0'
+
+
 # Whether the parser should convert \n into <br>.
 bloglike_lines = False
 
