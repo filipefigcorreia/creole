@@ -24,7 +24,7 @@
 
 import re
 
-__version__ = '1.0'
+__version__ = '1.0.1'
 
 
 # Whether the parser should convert \n into <br>.

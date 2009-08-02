@@ -1,14 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup
 import creole
 
 config = dict(
     name='creole',
     version=creole.__version__,
     url='http://oink.sheep.art.pl/WikiCreole%20parser%20in%20python',
-    download_url='http://sheep.art.pl/devel/creole/archive/tip.zip',
+    download_url='http://oink.sheep.art.pl/download/creole-1.0.tar.gz',
     license='GNU General Public License (GPL), BSD',
     author='Radomir Dopieralski, Thomas Waldmann',
     author_email='creole@sheep.art.pl',
@@ -21,6 +20,7 @@ config = dict(
         ('share/doc/creole.py/tests', ['test.py']),
         ('share/doc/creole.py/', ['COPYING']),
     ],
+    scripts=['creole2html.py'],
     platforms='any',
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -32,5 +32,6 @@ config = dict(
     ],
 )
 
+from distutils.core import setup
 setup(**config)
 
