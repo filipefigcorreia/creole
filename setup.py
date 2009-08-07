@@ -23,12 +23,14 @@ config = dict(
     scripts=['creole2html.py'],
     platforms='any',
     classifiers=[
+        'Topic :: Text Processing :: Markup',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Intended Audience :: Developers',
         'Topic :: Communications',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Programming Language :: Python',
         'Operating System :: OS Independent',
+        'License :: OSI Approved :: BSD License',
     ],
 )
 
