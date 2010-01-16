@@ -13,8 +13,12 @@ Test cases contributed by Jan Klopper (janklopper@underdark.nl),
 modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
 
 >>> import lxml.html.usedoctest
+>>> import creole
 >>> def parse(text):
-...     print HtmlEmitter(Parser(text).parse()).emit()
+...     print HtmlEmitter(creole.Parser(text).parse()).emit()
+>>> def wiki_parse(text):
+...     rules = creole.Rules(wiki_words=True)
+...     print HtmlEmitter(creole.Parser(text, rules).parse()).emit()
 
 >>> parse(u'test')
 <p>test</p>
@@ -129,10 +133,14 @@ XXX This might be considered a bug, but it's impossible to detect in general.
 
 >>> parse(u'[[http://example.com|test]]')
 <p><a href="http://example.com">test</a></p>
+
+>>> wiki_parse(u'Lorem WikiWord iPsum sit ameT.')
+<p>Lorem <a href="WikiWord">WikiWord</a> iPsum sit ameT.</p>
+
 """
 
 import re
-from creole import Parser
+from creole import Parser, Rules
 
 class Rules:
     # For the link targets:

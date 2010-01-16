@@ -23,6 +23,7 @@
 """
 
 import re
+import sys
 
 __version__ = '1.1'
 
@@ -109,16 +110,8 @@ class Rules:
             ) \s*
         ''' % '|'.join([link, macro, image, code])
 
-    def __init__(self, bloglike_lines=False, url_protocols=None):
-        if bloglike_lines:
-            self.text = r'(?P<text> .+ ) (?P<break> (?<!\\)$\n(?!\s*$) )?'
-        if url_protocols is not None:
-            self.proto = '|'.join(re.escape(p) for p in url_protocols)
-        self.url =  r'''(?P<url>
-            (^ | (?<=\s | [.,:;!?()/=]))
-            (?P<escaped_url>~)?
-            (?P<url_target> (?P<url_proto> %s ):\S+? )
-            ($ | (?=\s | [,.:;!?()] (\s | $))))''' % self.proto
+    def __init__(self, bloglike_lines=False, url_protocols=None,
+                 wiki_words=False):
         c = re.compile
         # For pre escaping, in creole 1.0 done with ~:
         self.pre_escape_re = c(self.pre_escape, re.M | re.X)
@@ -129,15 +122,33 @@ class Rules:
         self.item_re = c(self.item, re.X | re.U | re.M)
         # for table cells
         self.cell_re = c(self.cell, re.X | re.U)
+
         # For block elements:
+        if bloglike_lines:
+            self.text = r'(?P<text> .+ ) (?P<break> (?<!\\)$\n(?!\s*$) )?'
         self.block_re = c('|'.join([self.line, self.head, self.separator,
                                     self.pre, self.list, self.table,
                                     self.text]), re.X | re.U | re.M)
+
         # For inline elements:
-        self.inline_re = c('|'.join([self.link, self.url, self.macro,
-                                     self.code, self.image, self.strong,
-                                     self.emph, self.linebreak,
-                                     self.escape, self.char]), re.X | re.U)
+        if url_protocols is not None:
+            self.proto = '|'.join(re.escape(p) for p in url_protocols)
+        self.url =  r'''(?P<url>
+            (^ | (?<=\s | [.,:;!?()/=]))
+            (?P<escaped_url>~)?
+            (?P<url_target> (?P<url_proto> %s ):\S+? )
+            ($ | (?=\s | [,.:;!?()] (\s | $))))''' % self.proto
+        inline_elements = [self.link, self.url, self.macro,
+                           self.code, self.image, self.strong,
+                           self.emph, self.linebreak,
+                           self.escape, self.char]
+        if wiki_words:
+            import unicodedata
+            up_case = u''.join(unichr(i) for i in xrange(sys.maxunicode)
+                               if unicodedata.category(unichr(i))=='Lu')
+            self.wiki = ur'''(?P<wiki>[%s]\w+[%s]\w+)''' % (up_case, up_case)
+            inline_elements.insert(3, self.wiki)
+        self.inline_re = c('|'.join(inline_elements), re.X | re.U)
 
 class Parser:
     """
@@ -203,6 +214,15 @@ class Parser:
         self.text = None
     _link_target_repl = _link_repl
     _link_text_repl = _link_repl
+
+    def _wiki_repl(self, groups):
+        """Handle WikiWord links, if enabled."""
+
+        text = groups.get('wiki', '')
+        node = DocNode('link', self.cur)
+        node.content = text
+        DocNode('text', node, node.content)
+        self.text = None
 
     def _macro_repl(self, groups):
         """Handles macros using the placeholder syntax."""
