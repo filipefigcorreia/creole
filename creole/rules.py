@@ -5,6 +5,24 @@ import re
 import sys
 
 
+class LinkRules(object):
+    """Rules for recognizing external links."""
+
+    # For the link targets:
+    proto = r'http|https|ftp|nntp|news|mailto|telnet|file|irc'
+    extern = r'(?P<extern_addr>(?P<extern_proto>%s):.*)' % proto
+    interwiki = r'''
+            (?P<inter_wiki> [A-Z][a-zA-Z]+ ) :
+            (?P<inter_page> .* )
+        '''
+
+    def __init__(self):
+        self.addr_re = re.compile('|'.join([
+                self.extern,
+                self.interwiki,
+            ]), re.X | re.U) # for addresses
+
+
 class Rules(object):
     """Hold all the rules for generating regular expressions."""
 

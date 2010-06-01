@@ -1,20 +1,149 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+ur"""
+WikiCreole to HTML converter
+This program is an example of how the creole.py WikiCreole parser
+can be used.
+
+@copyright: 2007 MoinMoin:RadomirDopieralski
+@license: BSD, see COPYING for details.
+
+Test cases contributed by Jan Klopper (janklopper@underdark.nl),
+modified by Radomir Dopieralski (MoinMoin:RadomirDopieralski).
+
+>>> import lxml.html.usedoctest
+>>> import creole
+>>> def parse(text):
+...     print HtmlEmitter(creole.Parser(text).parse()).emit()
+>>> def wiki_parse(text):
+...     rules = creole.Rules(wiki_words=True)
+...     print HtmlEmitter(creole.Parser(text, rules).parse()).emit()
+
+>>> parse(u'test')
+<p>test</p>
+
+>>> parse(u'test\ntest')
+<p>test test</p>
+
+>>> HtmlEmitter(Parser(u'test\ntest').parse()).emit()
+u'<p>test test</p>\n'
+
+>>> parse(u'test\n\ntest')
+<p>test</p><p>test</p>
+
+>>> parse(u'test\\\\test')
+<p>test<br>test</p>
+
+>>> parse(u'ÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿŒœ%0A')
+<p>ÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿŒœ%0A</p>
+
+>>> parse(u'----')
+<hr>
+
+>>> parse(u'==test==')
+<h2>test</h2>
+
+>>> parse(u'== test')
+<h2>test</h2>
+
+>>> parse(u'==test====')
+<h2>test</h2>
+
+>>> parse(u'=====test')
+<h5>test</h5>
+
+>>> parse(u'==test==\ntest\n===test===')
+<h2>test</h2>
+<p>test</p>
+<h3>test</h3>
+
+>>> parse(u'test\n* test line one\n * test line two\ntest\n\ntest')
+<p>test</p>
+<ul>
+    <li>test line one</li>
+    <li>test line two test</li>
+</ul>
+<p>test</p>
+
+>>> parse(u'* test line one\n* test line two\n** Nested item')
+<ul>
+    <li>test line one</li>
+    <li>test line two<ul>
+        <li>Nested item</li>
+    </ul></li>
+</ul>
+
+>>> parse(u'* test line one\n* test line two\n# Nested item')
+<ul>
+    <li>test line one</li>
+    <li>test line two<ol>
+        <li>Nested item</li>
+    </ol></li>
+</ul>
+
+>>> parse(u'test //test test// test **test test** test')
+<p>test <i>test test</i> test <b>test test</b> test</p>
+
+>>> parse(u'test //test **test// test** test')
+<p>test <i>test <b>test<i> test<b> test</b></i></b></i></p>
+
+>>> parse(u'**test')
+<p><b>test</b></p>
+
+>>> parse(u'|x|y|z|\n|a|b|c|\n|d|e|f|\ntest')
+<table>
+    <tr><td>x</td><td>y</td><td>z</td></tr>
+    <tr><td>a</td><td>b</td><td>c</td></tr>
+    <tr><td>d</td><td>e</td><td>f</td></tr>
+</table>
+<p>test</p>
+
+>>> parse(u'|=x|y|=z=|\n|a|b|c|\n|d|e|f|')
+<table>
+    <tr><th>x</th><td>y</td><th>z</th></tr>
+    <tr><td>a</td><td>b</td><td>c</td></tr>
+    <tr><td>d</td><td>e</td><td>f</td></tr>
+</table>
+
+>>> parse(u'test http://example.com/test test')
+<p>test <a href="http://example.com/test">http://example.com/test</a> test</p>
+
+>>> parse(u'http://example.com/,test, test')
+<p><a href="http://example.com/,test">http://example.com/,test</a>, test</p>
+
+>>> parse(u'(http://example.com/test)')
+<p>(<a href="http://example.com/test">http://example.com/test</a>)</p>
+
+XXX This might be considered a bug, but it's impossible to detect in general.
+>>> parse(u'http://example.com/(test)')
+<p><a href="http://example.com/(test">http://example.com/(test</a>)</p>
+
+>>> parse(u'http://example.com/test?test&test=1')
+<p><a href="http://example.com/test?test&amp;test=1">http://example.com/test?test&amp;test=1</a></p>
+
+>>> parse(u'~http://example.com/test')
+<p>http://example.com/test</p>
+
+>>> parse(u'http://example.com/~test')
+<p><a href="http://example.com/~test">http://example.com/~test</a></p>
+
+>>> parse(u'[[test]] [[tset|test]]')
+<p><a href="test">test</a> <a href="tset">test</a></p>
+
+>>> parse(u'[[http://example.com|test]]')
+<p><a href="http://example.com">test</a></p>
+
+>>> wiki_parse(u'Lorem WikiWord iPsum sit ameT.')
+<p>Lorem <a href="WikiWord">WikiWord</a> iPsum sit ameT.</p>
+
+"""
 
 import re
 
 from creole.parser import Parser
+from creole.rules import LinkRules
 
-
-class Rules(object):
-    # For the link targets:
-    proto = r'http|https|ftp|nntp|news|mailto|telnet|file|irc'
-    extern = r'(?P<extern_addr>(?P<extern_proto>%s):.*)' % proto
-    interwiki = r'''
-            (?P<inter_wiki> [A-Z][a-zA-Z]+ ) :
-            (?P<inter_page> .* )
-        '''
 
 class HtmlEmitter(object):
     """
@@ -22,12 +151,9 @@ class HtmlEmitter(object):
     tree consisting of DocNodes.
     """
 
-    addr_re = re.compile('|'.join([
-            Rules.extern,
-            Rules.interwiki,
-        ]), re.X | re.U) # for addresses
-
-    def __init__(self, root):
+    def __init__(self, root, link_rules=None):
+        self.root = root
+        self.link_rules = link_rules or LinkRules()
         self.root = root
 
     def get_text(self, node):
@@ -98,7 +224,7 @@ class HtmlEmitter(object):
             inside = self.emit_children(node)
         else:
             inside = self.html_escape(target)
-        m = self.addr_re.match(target)
+        m = self.link_rules.addr_re.match(target)
         if m:
             if m.group('extern_addr'):
                 return u'<a href="%s">%s</a>' % (
@@ -111,7 +237,7 @@ class HtmlEmitter(object):
     def image_emit(self, node):
         target = node.content
         text = self.get_text(node)
-        m = self.addr_re.match(target)
+        m = self.link_rules.addr_re.match(target)
         if m:
             if m.group('extern_addr'):
                 return u'<img src="%s" alt="%s">' % (
