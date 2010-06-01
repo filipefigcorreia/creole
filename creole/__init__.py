@@ -28,5 +28,4 @@ __version__ = '1.2'
 from creole.rules import Rules
 from creole.parser import Parser
 from creole.document import DocNode
-from creole.html_emitter import HtmlEmitter
 
