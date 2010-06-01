@@ -17,11 +17,12 @@ config = dict(
     keywords='wiki wikicreole creole markup text',
     py_modules=['creole'],
     data_files=[
-        ('share/doc/creole.py/examples', ['creole2html.py']),
-        ('share/doc/creole.py/tests', ['test.py']),
+        ('share/doc/creole.py/examples',
+         ['exmaples/creole2html.py', 'exmaples/headings.py']),
+        ('share/doc/creole.py/tests', ['tests/test_html_emitter.py']),
         ('share/doc/creole.py', ['COPYING']),
     ],
-    scripts=['creole2html.py'],
+    scripts=['examples/creole2html.py'],
     platforms='any',
     classifiers=[
         'Topic :: Text Processing :: Markup',

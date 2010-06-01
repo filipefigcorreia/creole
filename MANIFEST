@@ -1,5 +1,11 @@
-creole.py
+creole/__init__.py
+creole/document.py
+creole/parser.py
+creole/rules.py
+creole/html_emitter.py
+tests/test_html_emitter.py
+examples/headings.py
+examples/creole2html.py
 setup.py
-creole2html.py
-test.py
 COPYING
+MANIFEST
