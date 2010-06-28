@@ -15,10 +15,10 @@ config = dict(
     description='Parser for WikiCreole text markup.',
     long_description=creole.__doc__,
     keywords='wiki wikicreole creole markup text',
-    py_modules=['creole'],
+    packages=['creole'],
     data_files=[
         ('share/doc/creole.py/examples',
-         ['exmaples/creole2html.py', 'exmaples/headings.py']),
+         ['exmaples/creole2html.py', 'examples/headings.py']),
         ('share/doc/creole.py/tests', ['tests/test_html_emitter.py']),
         ('share/doc/creole.py', ['COPYING']),
     ],
