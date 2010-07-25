@@ -54,9 +54,6 @@ class Parser(object):
             if self.text is None:
                 self.text = DocNode('text', self.cur, u'')
             self.text.content += groups.get('url_target')
-    _url_target_repl = _url_repl
-    _url_proto_repl = _url_repl
-    _escaped_url = _url_repl
 
     def _link_repl(self, groups):
         """Handle all kinds of links."""
@@ -67,11 +64,9 @@ class Parser(object):
         self.cur = DocNode('link', self.cur)
         self.cur.content = target
         self.text = None
-        re.sub(self.rules.link_re, self._replace, text)
+        self.parse_re(text, self.rules.link_re)
         self.cur = parent
         self.text = None
-    _link_target_repl = _link_repl
-    _link_text_repl = _link_repl
 
     def _wiki_repl(self, groups):
         """Handle WikiWord links, if enabled."""
@@ -91,9 +86,6 @@ class Parser(object):
         node.args = groups.get('macro_args', '') or ''
         DocNode('text', node, text or name)
         self.text = None
-    _macro_name_repl = _macro_repl
-    _macro_args_repl = _macro_repl
-    _macro_text_repl = _macro_repl
 
     def _image_repl(self, groups):
         """Handles images and attachemnts included in the page."""
@@ -103,8 +95,6 @@ class Parser(object):
         node = DocNode("image", self.cur, target)
         DocNode('text', node, text or node.content)
         self.text = None
-    _image_target_repl = _image_repl
-    _image_text_repl = _image_repl
 
     def _separator_repl(self, groups):
         self.cur = self._upto(self.cur, ('document', 'section', 'blockquote'))
@@ -136,19 +126,15 @@ class Parser(object):
         self.cur = DocNode('list_item', self.cur)
         self.parse_inline(text)
         self.text = None
-    _item_text_repl = _item_repl
-    _item_head_repl = _item_repl
 
     def _list_repl(self, groups):
         text = groups.get('list', u'')
-        self.rules.item_re.sub(self._replace, text)
+        self.parse_re(text, self.rules.item_re)
 
     def _head_repl(self, groups):
         self.cur = self._upto(self.cur, ('document', 'section', 'blockquote'))
         node = DocNode('header', self.cur, groups.get('head_text', '').strip())
         node.level = len(groups.get('head_head', ' '))
-    _head_head_repl = _head_repl
-    _head_text_repl = _head_repl
 
     def _text_repl(self, groups):
         text = groups.get('text', '')
@@ -201,9 +187,6 @@ class Parser(object):
         node = DocNode('preformatted', self.cur, text)
         node.sect = kind or ''
         self.text = None
-    _pre_text_repl = _pre_repl
-    _pre_head_repl = _pre_repl
-    _pre_kind_repl = _pre_repl
 
     def _line_repl(self, groups):
         self.cur = self._upto(self.cur, ('document', 'section', 'blockquote'))
@@ -211,8 +194,6 @@ class Parser(object):
     def _code_repl(self, groups):
         DocNode('code', self.cur, groups.get('code_text', u'').strip())
         self.text = None
-    _code_text_repl = _code_repl
-    _code_head_repl = _code_repl
 
     def _emph_repl(self, groups):
         if self.cur.kind != 'emphasis':
@@ -242,29 +223,25 @@ class Parser(object):
             self.text = DocNode('text', self.cur, u'')
         self.text.content += groups.get('char', u'')
 
-    def _replace(self, match):
-        """Invoke appropriate _*_repl method. Called for every matched group."""
-
-        groups = match.groupdict()
-        for name, text in groups.iteritems():
-            if text is not None:
-                replace = getattr(self, '_%s_repl' % name)
-                replace(groups)
-                return
-
     def parse_inline(self, raw):
         """Recognize inline elements inside blocks."""
 
-        re.sub(self.rules.inline_re, self._replace, raw)
+        self.parse_re(raw, self.rules.inline_re)
 
-    def parse_block(self, raw):
-        """Recognize block elements."""
+    def parse_re(self, raw, rules_re):
+        """Parse a fragment according to the compiled rules."""
 
-        re.sub(self.rules.block_re, self._replace, raw)
+        for match in rules_re.finditer(raw):
+            groups = dict((k, v) for (k, v)
+                          in match.groupdict().iteritems()
+                          if v is not None)
+            name = match.lastgroup
+            function = getattr(self, '_%s_repl' % name)
+            function(groups)
 
     def parse(self):
         """Parse the text given as self.raw and return DOM tree."""
 
-        self.parse_block(self.raw)
+        self.parse_re(self.raw, self.rules.block_re)
         return self.root
 
