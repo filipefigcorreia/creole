@@ -3,7 +3,9 @@ creole/document.py
 creole/parser.py
 creole/rules.py
 creole/html_emitter.py
+creole/genshi_emitter.py
 tests/test_html_emitter.py
+tests/test_genshi_emitter.py
 examples/headings.py
 examples/creole2html.py
 setup.py
