@@ -18,7 +18,7 @@ config = dict(
     packages=['creole'],
     data_files=[
         ('share/doc/creole.py/examples',
-         ['exmaples/creole2html.py', 'examples/headings.py']),
+         ['examples/creole2html.py', 'examples/headings.py']),
         ('share/doc/creole.py/tests', ['tests/test_html_emitter.py']),
         ('share/doc/creole.py', ['COPYING']),
     ],
